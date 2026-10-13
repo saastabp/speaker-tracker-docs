@@ -35,6 +35,43 @@ Designed and built by **Brian Saastad**.
   by the migration runner; infrastructure tests assert the value of each resource, not just that it
   exists; a regression test has to fail against the old code before it counts.
 
+## Decisions driven by cost
+
+This runs in a personal AWS account, paid for out of pocket, for one user. Several choices that would
+be wrong for a funded multi-customer service are deliberate here, and each is recorded with its
+trade-off in [DECISIONS.md](DECISIONS.md#platform). Prices below are approximate on-demand list prices
+for us-west-2.
+
+- **A shared database instance.** The app has its own schema on a small RDS MySQL instance that
+  already runs another of my projects, rather than an instance of its own (a second always-on
+  `db.t4g.micro` is roughly $12 a month before storage, for a database that is idle most of the day).
+  *Trade-off:* the parameter group belongs to the other project and is not strict, so every session
+  sets strict `sql_mode` itself and logs what the server applied; reserved concurrency bounds this
+  app's connections so it cannot starve its neighbour; and the instance is single-AZ.
+- **Lambda functions outside a VPC.** Attaching them to a VPC would put them on private subnets with
+  no route out, and they need several AWS APIs (Secrets Manager, SES, EventBridge Scheduler, S3) plus
+  one destination no VPC endpoint can reach: the mail server's IMAP host on the public internet. That
+  means a **NAT gateway** (about $33 a month per availability zone, plus data charges) or interface
+  **VPC endpoints** (about $7 a month each per availability zone) *and* a NAT gateway for IMAP anyway
+  — fixed monthly charges that run whether or not anyone uses the app, for an app whose own
+  serverless costs scale with its single user.
+- **What protects the database instead.** It is reached on its public endpoint, but only over TLS
+  with the hostname verified, using **IAM database authentication**: each connection presents a
+  short-lived token minted from the function's role, so there is no database password to store or
+  leak, and only roles granted `rds-db:connect` can sign in. *Trade-off:* the endpoint is
+  network-reachable, and a cold start pays a 2–6 second TLS and token handshake — acceptable for one
+  occasional user, and the reason the API is one function rather than twenty.
+- **Smaller savings in the same spirit:** no provisioned concurrency, one ops-alert topic, sandbox
+  without Cognito or a custom domain, and log retention of one month in sandbox and three in
+  production.
+
+**A future revision is planned to be multi-tenant.** The data model is already tenant-scoped — every
+owned row carries a `user_id`, and every write checks that what it references belongs to the caller —
+so the remaining work is mostly elsewhere: a mailbox and a poller per tenant, per-tenant sending
+identities, and a review of everything that assumes one user ([BACKLOG](BACKLOG.md#deferred-deliberately)).
+That revision is also when the cost decisions above get revisited: a database of its own in private
+subnets, functions in the VPC with endpoints and NAT, and Multi-AZ, paid for by more than one user.
+
 ## Problems worth reading about
 
 - **SES rewrites the Message-ID** of every message it sends, so a reply's `In-Reply-To` names an id

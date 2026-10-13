@@ -43,7 +43,9 @@ is promised. When an item ships, delete it here and describe it in the document 
 
 Each has a reason in [DECISIONS.md](DECISIONS.md); revisit when the reason stops holding.
 
-- **More than one user.** Its own project, with its own requirements. Known work: the sending
+- **More than one user.** Planned for a future, multi-tenant revision — its own project, with its
+  own requirements, and the point at which the cost-driven platform choices (shared instance,
+  functions outside a VPC, single-AZ) are revisited. Known work: the sending
   address, the poller and reminders all assume one user's mailbox; shared templates are editable by
   anyone; sign-out does not end the Cognito session and the query cache is not cleared; S3 tenancy is
   enforced only by the application; one-off integrity checks across tenants.
