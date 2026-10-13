@@ -10,11 +10,6 @@ is promised. When an item ships, delete it here and describe it in the document 
 
 ## Queued features
 
-- **Rename and move materials.** Rename a material, and link it to a talk — or back to *standalone* —
-  after upload. A material is legitimately standalone (a general one-sheet) or tied to one talk, and
-  must be movable either way when it was filed wrong or its use changes. The API supports both
-  (`PUT /materials/{id}` replaces name and `talk_id`; `talk_id` null is standalone) and a hook exists
-  unwired (`useRenameMaterial`); the UI has neither.
 - **Attach an existing contact from the import card.** Today an imported message only offers *Add
   contact*, so a known person writing from a new address cannot be cleared without creating a
   duplicate. The API and hook exist (`PUT /emails/threads/{id}/contact`, `useLinkThreadContact`);

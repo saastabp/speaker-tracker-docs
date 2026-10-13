@@ -163,8 +163,10 @@ Three layers plus an edge layer; **dependencies point inward**.
   works.
 - **Server-owned vocabulary.** Stage names, order and labels come from `/catalogs` and `/funnel`;
   never hardcode a stage name or re-derive `sort_order`.
-- **Received HTML is untrusted.** Render it only through `SafeHtml` / `emailHtml.ts`; never
-  hand-write a DOMPurify `ALLOWED_URI_REGEXP` (it applies to every attribute).
+- **Untrusted HTML goes through `SafeHtml`.** Received mail and rendered Markdown (`markdown.ts`
+  passes raw HTML straight through) reach the page only via `SafeHtml` / `emailHtml.ts`, never
+  `dangerouslySetInnerHTML` directly; never hand-write a DOMPurify `ALLOWED_URI_REGEXP` (it applies
+  to every attribute).
 - **Request types mirror the backend models.** Each `api/*.ts` module says which backend model it
   mirrors; keep required fields required on both sides (the send's `idempotency_key` is required in
   both so the compiler finds every call site).
@@ -181,6 +183,7 @@ one must change the other in the same commit.
 | Money received / collected: paid comp **and** payment status `paid` | `repositories/dashboard.money_rollup` | `pages/History.tsx` `collectedTotal` |
 | Fee precision — `DECIMAL(10,2)` | `models/opportunities.py` `fee_amount` | `format.ts` `isValidFee` |
 | Largest material upload (25 MB) | `common/storage.MAX_MATERIAL_BYTES` | `api/materials.ts` `MAX_MATERIAL_BYTES` (a courtesy; the server enforces) |
+| Longest material description (500) | `models/materials.py` `MAX_DESCRIPTION_CHARS` | `api/materials.ts` `MAX_DESCRIPTION_CHARS` (the form's cap; the server enforces) |
 | Outreach-kind default (*initial* vs *correspondence*) | `core/outreach.infer_outreach_kind` | `components/OutreachFormModal.tsx` (display only) |
 | Initial payment status by comp type | `core/opportunities._INITIAL_PAYMENT_STATUS` | `components/OpportunityFormModal.tsx` |
 | Target cadences | `core/periods.CADENCES` and the `targets.cadence` ENUM | `api/targets.ts` |

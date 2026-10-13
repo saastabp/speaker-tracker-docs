@@ -4,7 +4,7 @@
 over TLS with IAM database authentication. Every table is `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_0900_ai_ci` (one column-level exception, §5).
 
-**The schema is exactly what `backend/src/migrations/0001`–`0016` build.** This document describes
+**The schema is exactly what `backend/src/migrations/0001`–`0017` build.** This document describes
 it and explains why it is shaped that way; when the two disagree, the migrations win and this file
 is the bug. Migrations are applied by `migrations/runner.py` (§6).
 
@@ -320,6 +320,7 @@ erDiagram
         bigint user_id FK
         bigint talk_id FK "nullable - standalone"
         varchar name
+        varchar description "500, nullable"
         varchar s3_key "512, UK with user_id"
         varchar content_type
         bigint size_bytes
@@ -672,9 +673,15 @@ Index `(user_id, sort_order)`.
 #### `materials`
 *`0012` · owned, soft-deleted.* Uploaded files — one-sheets, workshop handouts — stored in S3 and
 uploaded straight from the browser with a presigned PUT; `s3_key` (up to 512) names the object.
-`talk_id` is **nullable**: a material can be standalone (a general one-sheet) or belong to a talk.
-Attaching a material to an email copies its bytes into the message, so replacing a file never
-changes mail already sent.
+`talk_id` is **nullable**: a material can be standalone (a general one-sheet) or belong to one talk,
+and can be moved between the two at any time. **Removing a talk detaches its materials** — removed
+ones included — in the same transaction, leaving `updated_at` alone; otherwise a material would keep
+pointing at a removed talk, and since every edit sends its talk back and the talk check refuses a
+removed one, it could no longer be edited at all (`0017` cleared rows already in that state).
+`name` is also the filename the material is attached and downloaded under, which is why the form
+keeps the extension fixed. `description` (`0017`) is optional plain text of up to 500 characters,
+`NULL` when blank. Attaching a material to an email copies its bytes into the message, so renaming
+or replacing a file never changes mail already sent.
 
 `UNIQUE(user_id, s3_key)`; indexes `(user_id, sort_order)` and `(talk_id)`.
 
@@ -864,3 +871,4 @@ function on every deploy) in version order, forward-only. The runner's rules:
 | `0014_appointments.sql` | `appointments` |
 | `0015_opportunity_responses.sql` | `opportunity_responses` and the `opportunity_response_types` catalog |
 | `0016_image_trusted_senders.sql` | `image_trusted_senders` |
+| `0017_material_description.sql` | `materials.description`, and detaching materials from removed talks |

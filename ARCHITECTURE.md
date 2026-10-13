@@ -304,7 +304,7 @@ the gateway rejects unknown paths itself.
 | `email_imports.py` | GET `/emails/imports`, PUT `/emails/threads/{id}/contact`, PUT `/emails/threads/{id}/opportunity` — PUT because they set a property, so re-sending the same value succeeds |
 | `image_senders.py` | GET/PUT/DELETE `/image-senders` — senders whose remote images load automatically |
 | `talks.py` | GET/POST `/talks`, GET/PUT/DELETE `/talks/{id}` |
-| `materials.py` | GET/POST `/materials`, POST `/materials/upload-url`, PUT/DELETE `/materials/{id}`, PUT `/materials/{id}/file` (replace the bytes, keeping id, name and talk), GET `/materials/{id}/url` (presigned GET; `?disposition=attachment` to download) |
+| `materials.py` | GET/POST `/materials`, POST `/materials/upload-url`, PUT `/materials/{id}` (name, description and talk — a full replace), DELETE `/materials/{id}`, PUT `/materials/{id}/file` (replace the bytes, keeping id, name and talk), GET `/materials/{id}/url` (presigned GET; `?disposition=attachment` to download) |
 | `signatures.py` | GET/POST `/signatures`, PUT/DELETE `/signatures/{id}`, GET `/signatures/default` |
 
 **History has no handler.** It is closed opportunities — `GET /opportunities?closed=true`, and the
@@ -692,7 +692,9 @@ frontend/src/
   auth/         session seam + its two implementations (development, OIDC), runtime config
                 (/config.json), deep-link restore
   urlFilters.ts useFilterParams — every list page keeps its filters in the query string
-  dates.ts      date parsing/formatting; format.ts money; emailHtml.ts received-mail sanitizing
+  dates.ts      date parsing/formatting; format.ts money
+  emailHtml.ts  sanitizing (received mail, Markdown previews); markdown.ts parse only
+  fileNames.ts  name split for the materials form; the file-kind badge
 ```
 
 | Path | Page |

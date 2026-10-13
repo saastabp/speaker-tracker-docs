@@ -138,9 +138,14 @@ ordinary mail client; both see the same mail.
 ### Talks and materials
 
 - **Talks** — the menu of talks offered: title, duration (free text), one-liner.
-- **Materials** — uploaded files (one-sheets, handouts) up to 25 MB, previewable (PDF, images,
-  Markdown), downloadable, and replaceable in place. Attaching one to an email copies it, so replacing
-  a material never changes mail already sent.
+- **Materials** — uploaded files (one-sheets, handouts) up to 25 MB, previewable (PDF, images and
+  text; Markdown shows formatted, with its source one click away), downloadable, and replaceable in
+  place. Picking a file opens a form before anything uploads: a **name** (the filename by default; the extension stays fixed, since emails and
+  downloads use this name), an optional **description** of up to 500 characters, and an optional
+  **talk** — a material is standalone or filed under one talk. **Edit details** changes any of the
+  three later. The list shows each material's talk and description. Removing a talk leaves its
+  materials in place, standalone. Attaching one to an email copies it, so renaming or replacing a
+  material never changes mail already sent.
 
 ---
 
@@ -176,8 +181,6 @@ them. Queued work is in [BACKLOG.md](BACKLOG.md).
 - Email threads listed on a contact's or a gig's page (threads are reached from the inbox).
 - A research side panel in the composer.
 - Seeding a gig's *angle* from the venue's *how to approach*.
-- Linking a material to a talk from the UI, renaming a material, or moving it between talks (the
-  schema supports the link; materials are standalone in practice).
 - Attaching an existing contact from the import card (today it only offers *Add contact*).
 - A dark theme.
 

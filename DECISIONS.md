@@ -110,6 +110,11 @@ to 4 per character; production held nothing near the cap when it was introduced.
 thirteen hand-copied "does this row belong to the caller?" queries had already started to differ. A
 schema test keeps the list complete.
 
+**A material belongs to at most one talk** *(2026-10)*. `materials.talk_id` is nullable, not a join
+table; many-to-many was considered and declined. Removing a talk detaches its materials, which then
+stand alone. *Why:* left pointing at a removed talk, a material could no longer be edited, since
+every edit is a full replace that rejects removed talks.
+
 ## Email
 
 **WorkMail + SES + IMAP, not a mail API** *(2026-07)*. The user's mailbox is WorkMail, read in an
@@ -229,6 +234,12 @@ just URLs, and the back button works.
 
 **Light theme, sans-serif, brand by colour** *(2026-07)*. The user dislikes dark themes; the brand's
 display fonts are for the public website, not a working tool.
+
+**Markdown previews render, sanitized like received mail** *(2026-10)*. A `.md` material shows
+formatted, with its source one click away. Markdown can carry raw HTML, so the rendered result goes
+through the same sanitizer as an inbound email, remote images held back the same way. *Why:*
+received mail already puts sanitized third-party HTML in the page, and a file the speaker uploaded
+is less hostile than that; showing Markdown only as raw text was caution with no matching risk.
 
 ## Process
 
